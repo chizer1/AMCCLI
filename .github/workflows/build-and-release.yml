@@ -29,7 +29,7 @@ jobs:
         run: dotnet restore
 
       - name: Publish executable for ${{ matrix.runtime }}
-        run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained true /p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
+        run: dotnet publish AMCCLI/AMCCLI.csproj -c Release -r ${{ matrix.runtime }} --self-contained true /p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
