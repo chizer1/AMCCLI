@@ -23,13 +23,13 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: '7.x'
+          dotnet-version: '9.x'
 
       - name: Restore dependencies
         run: dotnet restore
 
       - name: Publish executable for ${{ matrix.runtime }}
-        run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained true -o ./publish/${{ matrix.runtime }}
+        run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained true /p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -44,43 +44,22 @@ jobs:
 
     steps:
       - name: Download Windows artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: publish-win-x64
           path: ./artifacts/win-x64
 
       - name: Download macOS artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: publish-osx-x64
           path: ./artifacts/osx-x64
 
       - name: Download Linux artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: publish-linux-x64
           path: ./artifacts/linux-x64
-
-      # Find the Windows executable file (.exe)
-      - name: Find Windows EXE
-        id: find_exe_win
-        run: |
-          exe=$(ls ./artifacts/win-x64/*.exe | head -n 1)
-          echo "exe=$exe" >> $GITHUB_OUTPUT
-
-      # Find the macOS executable file (no extension, executable bit set)
-      - name: Find macOS EXE
-        id: find_exe_osx
-        run: |
-          exe=$(find ./artifacts/osx-x64 -maxdepth 1 -type f -executable | head -n 1)
-          echo "exe=$exe" >> $GITHUB_OUTPUT
-
-      # Find the Linux executable file (no extension, executable bit set)
-      - name: Find Linux EXE
-        id: find_exe_linux
-        run: |
-          exe=$(find ./artifacts/linux-x64 -maxdepth 1 -type f -executable | head -n 1)
-          echo "exe=$exe" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         id: create_release
