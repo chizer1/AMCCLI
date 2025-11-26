@@ -43,7 +43,7 @@ jobs:
           cd ../../
 
       - name: Upload zipped artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-${{ matrix.runtime }}
           path: ./${{ matrix.runtime }}.zip
@@ -56,19 +56,19 @@ jobs:
 
     steps:
       - name: Download Windows artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-win-x64
           path: ./win
 
       - name: Download macOS artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-osx-x64
           path: ./osx
 
       - name: Download Linux artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-linux-x64
           path: ./linux
