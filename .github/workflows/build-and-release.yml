@@ -1,4 +1,4 @@
-name: Build, Release and Upload EXEs
+name: Build and Release
 
 on:
   push:
@@ -17,78 +17,105 @@ jobs:
           - linux-x64
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup .NET SDK
+      - name: Setup .NET
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: '9.x'
 
-      - name: Restore dependencies
+      - name: Restore
         run: dotnet restore
 
-      - name: Publish executable for ${{ matrix.runtime }}
-        run: dotnet publish AMCCLI/AMCCLI.csproj -c Release -r ${{ matrix.runtime }} --self-contained true /p:PublishSingleFile=true -o ./publish/${{ matrix.runtime }}
+      - name: Publish self-contained single-file
+        run: dotnet publish AMCCLI/AMCCLI.csproj \
+          -c Release \
+          -r ${{ matrix.runtime }} \
+          --self-contained true \
+          /p:PublishSingleFile=true \
+          -o ./publish/${{ matrix.runtime }}
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Zip output
+        run: |
+          cd publish/${{ matrix.runtime }}
+          zip -r ../../${{ matrix.runtime }}.zip .
+          cd ../../
+
+      - name: Upload zipped artifact
+        uses: actions/upload-artifact@v3
         with:
-          name: publish-${{ matrix.runtime }}
-          path: publish/${{ matrix.runtime }}
+          name: app-${{ matrix.runtime }}
+          path: ./${{ matrix.runtime }}.zip
+
 
   release:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/')
 
     steps:
       - name: Download Windows artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
-          name: publish-win-x64
-          path: ./artifacts/win-x64
+          name: app-win-x64
+          path: ./win
 
       - name: Download macOS artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
-          name: publish-osx-x64
-          path: ./artifacts/osx-x64
+          name: app-osx-x64
+          path: ./osx
 
       - name: Download Linux artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
         with:
-          name: publish-linux-x64
-          path: ./artifacts/linux-x64
+          name: app-linux-x64
+          path: ./linux
+
+      - name: Unzip Windows
+        run: unzip ./win/win-x64.zip -d win-out
+
+      - name: Unzip macOS
+        run: unzip ./osx/osx-x64.zip -d osx-out
+
+      - name: Unzip Linux
+        run: unzip ./linux/linux-x64.zip -d linux-out
+
+      - name: Find Windows EXE
+        id: win
+        run: |
+          exe=$(ls win-out/*.exe | head -n 1)
+          new="AMCCLI-win-x64.exe"
+          cp "$exe" "$new"
+          echo "exe=$new" >> $GITHUB_OUTPUT
+
+      - name: Find macOS executable
+        id: osx
+        run: |
+          exe=$(find osx-out -maxdepth 1 -type f -perm -111 | head -n 1)
+          new="AMCCLI-osx-x64"
+          cp "$exe" "$new"
+          chmod +x "$new"
+          echo "exe=$new" >> $GITHUB_OUTPUT
+
+      - name: Find Linux executable
+        id: linux
+        run: |
+          exe=$(find linux-out -maxdepth 1 -type f -perm -111 | head -n 1)
+          new="AMCCLI-linux-x64"
+          cp "$exe" "$new"
+          chmod +x "$new"
+          echo "exe=$new" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        id: create_release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
+          files: |
+            ${{ steps.win.outputs.exe }}
+            ${{ steps.osx.outputs.exe }}
+            ${{ steps.linux.outputs.exe }}
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-      - name: Upload Windows EXE to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ steps.find_exe_win.outputs.exe }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-      - name: Upload macOS EXE to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ steps.find_exe_osx.outputs.exe }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-      - name: Upload Linux EXE to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ steps.find_exe_linux.outputs.exe }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
