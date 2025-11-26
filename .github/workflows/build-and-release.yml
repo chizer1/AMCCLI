@@ -70,25 +70,25 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: Upload Windows EXE to Release
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ steps.find_exe_win.outputs.exe }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: Upload macOS EXE to Release
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ steps.find_exe_osx.outputs.exe }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
 
       - name: Upload Linux EXE to Release
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ steps.find_exe_linux.outputs.exe }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
