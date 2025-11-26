@@ -32,7 +32,7 @@ jobs:
         run: dotnet publish -c Release -r ${{ matrix.runtime }} --self-contained true -o ./publish/${{ matrix.runtime }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: publish-${{ matrix.runtime }}
           path: publish/${{ matrix.runtime }}
