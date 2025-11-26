@@ -17,6 +17,7 @@ Easily select multiple AMC theatres near you for a chosen date, seamlessly combi
 
 ### 4. Find a showtime and click "Buy Tickets" to pick your seats!  
 ![Buy Tickets](https://github.com/user-attachments/assets/32a028dc-a32d-4089-9eee-5d11ec29cd64)
+<img width="1231" height="882" alt="image" src="https://github.com/user-attachments/assets/854bdc0c-a669-4599-b9ee-978727e902f7" />
 
 ## How to run
 
@@ -26,3 +27,4 @@ Easily select multiple AMC theatres near you for a chosen date, seamlessly combi
 4. Unzip and run the executable (`.exe` on Windows, or the appropriate binary on other OSes).
 
 Enjoy picking your movies with ease!
+
